@@ -13,6 +13,7 @@ for ( row=0; row<board_row; row++ ) {
 
 var count = 0;
 var cells;
+var speed = 1000;
 // ブロックのパターン
 var blocks = {
   i: {
@@ -69,6 +70,7 @@ var blocks = {
 document.addEventListener("keydown", onKeyDown);
 
 loadTable();
+
 var refreshIntervalId = setInterval(function () {
   count++;
   document.getElementById("hello_text").textContent = "はじめてのJavaScript(" + count + ")";
@@ -77,11 +79,11 @@ var refreshIntervalId = setInterval(function () {
   } else { // なければ
     deleteRow();// そろっている行を消す
     if (generateBlock()) { // ランダムにブロックを作成する
-        alert("game over!");
-        clearInterval(refreshIntervalId);
+      // alert("game over!");
+      clearInterval(refreshIntervalId);
     }
   }
-}, 1000);
+}, speed);
 
 /* ------ ここから下は関数の宣言部分 ------ */
 
@@ -132,32 +134,42 @@ function fallBlocks() {
 }
 
 var isFalling = false;
+// 落下中のブロックがあるか確認する
 function hasFallingBlock() {
-  // 落下中のブロックがあるか確認する
   return isFalling;
 }
 
+// そろっている行を消す
 function deleteRow() {
-  // そろっている行を消す
-  for (var row = 19; row >= 0; row--) {
+  var DelRow = [];
+  for (var row = board_row - 1; row >= 0; row--) {
     var canDelete = true;
-    for (var col = 0; col < 10; col++) {
+    for (var col = 0; col < board_col; col++) {
       if (cells[row][col].className === "") {
         canDelete = false;
       }
     }
     if (canDelete) {
-      // 1行消す
-      for (var col = 0; col < 10; col++) {
+      DelRow.push(row);
+    }
+  }
+
+  if (DelRow.length) {
+    // 揃った行を削除
+    for (var row of DelRow) {
+      for (var col = 0; col < board_col; col++) {
         cells[row][col].className = "";
+        cells[row][col].blockNum = null;
       }
-      // 上の行のブロックをすべて1マス落とす
-      for (var downRow = row - 1; row >= 0; row--) {
-        for (var col = 0; col < 10; col++) {
-          cells[downRow + 1][col].className = cells[downRow][col].className;
-          cells[downRow + 1][col].blockNum = cells[downRow][col].blockNum;
-          cells[downRow][col].className = "";
-          cells[downRow][col].blockNum = null;
+    }
+
+    for (var i = 0; i < DelRow.length; i++) {
+      for (var r = DelRow[i] + i; r > 0; r--) {
+        for (var c = 0; c < board_col; c++) {
+          cells[r][c].className = cells[r - 1][c].className;
+          cells[r][c].blockNum = cells[r - 1][c].blockNum;
+          cells[r - 1][c].className = "";
+          cells[r - 1][c].blockNum = null;
         }
       }
     }
