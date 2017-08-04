@@ -101,15 +101,15 @@ function loadTable() {
 
 function fallBlocks() {
   // 1. 底についていないか？
-  for (var col = 0; col < 10; col++) {
+  for (var col = 0; col < board_col; col++) {
     if (cells[19][col].blockNum === fallingBlockNum) {
       isFalling = false;
       return; // 一番下の行にブロックがいるので落とさない
     }
   }
   // 2. 1マス下に別のブロックがないか？
-  for (var row = 18; row >= 0; row--) {
-    for (var col = 0; col < 10; col++) {
+  for (var row = board_row-2; row >= 0; row--) {
+    for (var col = 0; col < board_col; col++) {
       if (cells[row][col].blockNum === fallingBlockNum) {
         if (cells[row + 1][col].className !== "" && cells[row + 1][col].blockNum !== fallingBlockNum){
           isFalling = false;
@@ -119,8 +119,8 @@ function fallBlocks() {
     }
   }
   // 下から二番目の行から繰り返しクラスを下げていく
-  for (var row = 18; row >= 0; row--) {
-    for (var col = 0; col < 10; col++) {
+  for (var row = board_row-2; row >= 0; row--) {
+    for (var col = 0; col < board_col; col++) {
       if (cells[row][col].blockNum === fallingBlockNum) {
         cells[row + 1][col].className = cells[row][col].className;
         cells[row + 1][col].blockNum = cells[row][col].blockNum;
@@ -195,30 +195,64 @@ function generateBlock() {
   return flag;
 }
 
-function moveRight() {
-  // ブロックを右に移動させる
-  for (var row = 0; row < 20; row++) {
-    for (var col = 9; col >= 0; col--) {
+function findFalingBlock() {
+  var FalingBlockCells = [];
+  for (var row = 0; row < board_row; row++) {
+    for (var col = 0; col < board_col; col++) {
       if (cells[row][col].blockNum === fallingBlockNum) {
-        cells[row][col + 1].className = cells[row][col].className;
-        cells[row][col + 1].blockNum = cells[row][col].blockNum;
-        cells[row][col].className = "";
-        cells[row][col].blockNum = null;
+        FalingBlockCells.push([row, col])
       }
+    }
+  }
+  return FalingBlockCells;
+}
+
+// ブロックを右に移動させる
+function moveRight() {
+  var FalingBlockCells = findFalingBlock();
+  var flag = 1
+
+  // ブロックを右に移動できるか判定(NG: flag <- 0)
+  for (var c of FalingBlockCells) {
+    if (c[1] === (board_col - 1) ||
+        cells[c[0]][c[1] + 1].blockNum !== fallingBlockNum &&
+        cells[c[0]][c[1] + 1].className !== "")
+    {
+      flag = 0;
+    }
+  }
+
+  if (flag) {
+    for (var c of FalingBlockCells.reverse()) {
+        cells[c[0]][c[1] + 1].className = cells[c[0]][c[1]].className;
+        cells[c[0]][c[1] + 1].blockNum = cells[c[0]][c[1]].blockNum;
+        cells[c[0]][c[1]].className = "";
+        cells[c[0]][c[1]].blockNum = null;
     }
   }
 }
 
+// ブロックを左に移動させる
 function moveLeft() {
-  // ブロックを左に移動させる
-  for (var row = 0; row < 20; row++) {
-    for (var col = 0; col < 10; col++) {
-      if (cells[row][col].blockNum === fallingBlockNum) {
-        cells[row][col - 1].className = cells[row][col].className;
-        cells[row][col - 1].blockNum = cells[row][col].blockNum;
-        cells[row][col].className = "";
-        cells[row][col].blockNum = null;
-      }
+  var FalingBlockCells = findFalingBlock();
+  var flag = 1
+
+  // ブロックを左に移動できるか判定(NG: flag <- 0)
+  for (var c of FalingBlockCells) {
+    if (c[1] === 0 ||
+        cells[c[0]][c[1] - 1].blockNum !== fallingBlockNum &&
+        cells[c[0]][c[1] - 1].className !== "")
+    {
+      flag = 0;
+    }
+  }
+
+  if (flag) {
+    for (var c of FalingBlockCells) {
+        cells[c[0]][c[1] - 1].className = cells[c[0]][c[1]].className;
+        cells[c[0]][c[1] - 1].blockNum = cells[c[0]][c[1]].blockNum;
+        cells[c[0]][c[1]].className = "";
+        cells[c[0]][c[1]].blockNum = null;
     }
   }
 }
