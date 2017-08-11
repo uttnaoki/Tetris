@@ -4,11 +4,10 @@ var board_row = 20;
 var board_col = 10;
 $("#board").append('<table id="board_table"></table>')
 for ( row=0; row<board_row; row++ ) {
-  $("#board_table").append('<tr id="board_table_row' + row + '">')
+  $("#board_table").append('<tr id="board_table_row' + row + '"></tr>')
   for ( col=0; col<board_col; col++ ) {
     $("#board_table_row" + row).append('<td></td>')
   }
-  $("#board_table").append('</tr>')
 }
 
 var count = 0;
@@ -79,7 +78,7 @@ var refreshIntervalId = setInterval(function () {
   } else { // なければ
     deleteRow();// そろっている行を消す
     if (generateBlock()) { // ランダムにブロックを作成する
-      // alert("game over!");
+      alert("game over!");
       clearInterval(refreshIntervalId);
     }
   }
